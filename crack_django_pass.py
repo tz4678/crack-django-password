@@ -17,6 +17,22 @@ import sys
 HELP_FLAGS = {'-h', '--help'}
 
 
+color_map = {
+    'black': 30,
+    'red': 31,
+    'green': 32,
+    'yellow': 33,
+    'blue': 34,
+    'purple': 35,
+    'cyan': 36,
+    'white': 37,
+}
+
+
+def colorize(color, text):
+    return f'\033[0;{color_map[color]}m{text}\033[0m'
+
+
 def check_password(args):
     password, secret_key, iters, ref_hash = args
     pass_hash = hashlib.pbkdf2_hmac(
@@ -54,10 +70,10 @@ def main():
             continue
         
         pool.terminate()
-        print("\r[!] Found:", result)
+        print('\r' + colorize('green', '[!] Found: {result}'))
         return
 
-    print('\n[-] Nothing found :-(')
+    print('\r' + colorize('red', '[-] Nothing found :-('))
 
     
 if __name__ == '__main__':
