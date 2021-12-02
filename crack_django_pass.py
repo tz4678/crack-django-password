@@ -1,4 +1,14 @@
 #!/usr/bin/env python
+"""
+Django Password Hash:
+
+pbkdf2_sha256$2000$xDb4PWMWoQengkNyzh1IU3jGkZWK+BKManvkeJPunVQ=
+
+    >>> import hashlib
+    >>> import base64
+    >>> base64.b64encode(hashlib.pbkdf2_hmac('sha256', b'abc', b'good_salt', 2000))
+    b'xDb4PWMWoQengkNyzh1IU3jGkZWK+BKManvkeJPunVQ='
+"""
 import base64
 import hashlib
 import sys
