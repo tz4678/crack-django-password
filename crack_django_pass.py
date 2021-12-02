@@ -11,32 +11,54 @@ pbkdf2_sha256$2000$xDb4PWMWoQengkNyzh1IU3jGkZWK+BKManvkeJPunVQ=
 """
 import base64
 import hashlib
+import multiprocessing as mp
 import sys
 
 HELP_FLAGS = {'-h', '--help'}
 
-if 3 > len(sys.argv) or set(sys.argv) & HELP_FLAGS:
-    print('Usage:', sys.argv[0], 'PASSWORD_HASH', 'SECRET_KEY', 'DICT_FILE')
-    sys.exit(0)
 
-password_hash, secret_key, dict_file = sys.argv[1:]
+def check_password(args):
+    password, secret_key, iters, ref_hash = args
+    pass_hash = hashlib.pbkdf2_hmac(
+        'sha256',
+        password.encode(),
+        secret_key.encode(),
+        iters,
+    )
+    if pass_hash == ref_hash:
+        return password
+    return False
 
-# pbkdf2_sha256$10000$Bt...
-algo, iter_count, password_hash = password_hash.split('$', 2)
-password_hash = base64.b64decode(password_hash)
-with open(dict_file) as f:
-    for i, line in enumerate(f, 1):
-        print(f'\riter: {i}', end='')
-        password = line.rstrip()
-        if not password:
+
+def main():
+    if 3 > len(sys.argv) or set(sys.argv) & HELP_FLAGS:
+        print('Usage:', sys.argv[0], 'PASS_HASH', 'SECRET_KEY', 'DICT_FILE')
+        sys.exit(0)
+
+    pass_hash, secret_key, dict_file = sys.argv[1:]
+    with open(dict_file) as f:
+        candidates = f.read().splitlines()
+        
+    algo, iters, pass_hash = pass_hash.split('$', 2)
+    assert algo == 'pbkdf2_sha256'
+    iters = int(iters)
+    pass_hash = base64.b64decode(pass_hash)
+    
+    pool = mp.Pool(mp.cpu_count() * 2)
+    for number, result in enumerate(pool.map(check_password, (
+            (candidate, secret_key, iters, pass_hash) for candidate in candidates)), 1):
+        progress_value = round(number / len(candidates) * 100)
+        print(f'\rProgress:', progress_value, end='')
+        
+        if False == result:
             continue
-        password_hash1 = hashlib.pbkdf2_hmac(
-            'sha256',
-            password.encode(),
-            secret_key.encode(),
-            int(iter_count),
-        )
-        if password_hash == password_hash1:
-            print()
-            print("Password:", password)
-            break
+        
+        pool.terminate()
+        print("\rPassword:", result)
+        return
+
+    print('\nNothing found :-(')
+
+    
+if __name__ == '__main__':
+    main()
