@@ -48,16 +48,16 @@ def main():
     for number, result in enumerate(pool.map(check_password, (
             (candidate, secret_key, iters, pass_hash) for candidate in candidates)), 1):
         progress_value = round(number / len(candidates) * 100)
-        print(f'\rPasswords checked: {progress_value}%', end='')
+        print(f'\rCandidates checked: {progress_value}%', end='')
         
         if False == result:
             continue
         
         pool.terminate()
-        print("\rPassword:", result)
+        print("\r[!] Found:", result)
         return
 
-    print('\nNothing found :-(')
+    print('\n[-] Nothing found :-(')
 
     
 if __name__ == '__main__':
