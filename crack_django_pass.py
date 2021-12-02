@@ -54,27 +54,38 @@ def main():
     pass_hash, secret_key, dict_file = sys.argv[1:]
     with open(dict_file) as f:
         candidates = f.read().splitlines()
-        
+
     algo, iters, pass_hash = pass_hash.split('$', 2)
     assert algo == 'pbkdf2_sha256'
     iters = int(iters)
     pass_hash = base64.b64decode(pass_hash)
-    
+
     pool = mp.Pool(mp.cpu_count() * 2)
-    for number, result in enumerate(pool.map(check_password, (
-            (candidate, secret_key, iters, pass_hash) for candidate in candidates)), 1):
+    # count = 0
+
+    for number, result in enumerate(
+        pool.imap_unordered(
+            check_password,
+            (
+                (candidate, secret_key, iters, pass_hash)
+                for candidate in candidates
+            ),
+        ),
+        1,
+    ):
+        # print(f'\r{(count := count + 1)}', end='')
         progress_value = round(number / len(candidates) * 100)
         print(f'\rCandidates checked: {progress_value}%', end='')
-        
-        if False == result:
+
+        if result == False:
             continue
-        
+
         pool.terminate()
-        print('\r' + colorize('green', '[!] Found: {result}'))
+        print('\r\033[0K' + colorize('green', f'[!] Found: {result}'))
         return
 
-    print('\r' + colorize('red', '[-] Nothing found :-('))
+    print('\r\033[0K' + colorize('red', '[-] Nothing found :-('))
 
-    
+
 if __name__ == '__main__':
     main()
