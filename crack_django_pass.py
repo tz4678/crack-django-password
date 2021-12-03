@@ -17,7 +17,7 @@ import sys
 HELP_FLAGS = {'-h', '--help'}
 
 
-color_map = {
+COLORS = {
     'black': 30,
     'red': 31,
     'green': 32,
@@ -30,7 +30,7 @@ color_map = {
 
 
 def colorize(color, text):
-    return f'\033[0;{color_map[color]}m{text}\033[0m'
+    return f'\033[0;{COLORS[color]}m{text}\033[0m'
 
 
 def check_password(args):
