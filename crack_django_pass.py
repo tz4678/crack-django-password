@@ -81,10 +81,10 @@ def main():
             continue
 
         pool.terminate()
-        print('\r\033[0K' + colorize('green', f'[!] Found: {result}'))
+        print('\r\033[0K' + colorize('green', f'[FOUND] {result}'))
         return
 
-    print('\r\033[0K' + colorize('red', '[-] Nothing found :-('))
+    print('\r\033[0K' + colorize('red', '[!] Nothing found :-('))
 
 
 if __name__ == '__main__':
